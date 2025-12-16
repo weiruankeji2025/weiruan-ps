@@ -1,0 +1,49 @@
+# Nginx 配置示例 - AI 背景消除工具
+# 将此配置添加到你的 nginx server 块中
+
+server {
+    listen 80;
+    listen 443 ssl http2;
+    server_name ps.weiruan.org;
+
+    root /var/www/html;  # 修改为你的 dist 目录路径
+    index index.html;
+
+    # SSL 配置 (如果使用 HTTPS)
+    # ssl_certificate /path/to/cert.pem;
+    # ssl_certificate_key /path/to/key.pem;
+
+    # MIME 类型配置
+    types {
+        application/javascript js mjs;
+        text/css css;
+        application/wasm wasm;
+        text/html html;
+        image/svg+xml svg;
+        image/png png;
+        image/jpeg jpg jpeg;
+        application/json json;
+    }
+
+    # 必需的安全头 (background-removal 需要 SharedArrayBuffer)
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Embedder-Policy "require-corp" always;
+
+    # 静态资源缓存
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header Cross-Origin-Opener-Policy "same-origin" always;
+        add_header Cross-Origin-Embedder-Policy "require-corp" always;
+    }
+
+    # SPA 路由支持
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Gzip 压缩
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript application/wasm;
+    gzip_min_length 1000;
+}

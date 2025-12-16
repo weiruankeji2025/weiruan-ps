@@ -1,0 +1,36 @@
+<IfModule mod_mime.c>
+  AddType application/javascript .js .mjs
+  AddType text/css .css
+  AddType application/wasm .wasm
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|mjs)$">
+    Header set Content-Type "application/javascript; charset=utf-8"
+  </FilesMatch>
+  <FilesMatch "\.css$">
+    Header set Content-Type "text/css; charset=utf-8"
+  </FilesMatch>
+  <FilesMatch "\.wasm$">
+    Header set Content-Type "application/wasm"
+  </FilesMatch>
+
+  # Required for SharedArrayBuffer (background-removal uses it)
+  Header set Cross-Origin-Opener-Policy "same-origin"
+  Header set Cross-Origin-Embedder-Policy "require-corp"
+</IfModule>
+
+# Enable CORS
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+</IfModule>
+
+# Rewrite for SPA
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
